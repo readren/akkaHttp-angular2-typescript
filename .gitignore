@@ -1,4 +1,13 @@
-<<<<<<< HEAD
+logs
+target
+.idea
+/.classpath
+/.project
+/.settings
+/RUNNING_PID
+node_modules
+npm-debug.log
+
 *.class
 *.log
 
@@ -12,19 +21,9 @@ lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/
+.cache-main
 
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
-=======
-logs
-target
-.idea
-/.classpath
-/.project
-/.settings
-/RUNNING_PID
-node_modules
-npm-debug.log
->>>>>>> f1c623816e9b9c4176fc92b46440082163d8e25c
 /bin/

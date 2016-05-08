@@ -1,19 +1,18 @@
-@()
 <!doctype html>
 <html lang="en" data-framework="angular2">
     <head>
-        @* In this version of the application the typescript compilation is done by the play framework.
-           The browser downloads .js files. *@
+        <!-- In this version of the application the typescript compilation is done by the play framework. 
+           The browser downloads .js files. -->
         <meta charset="utf-8">
         <title>Angular2 • TodoMVC</title>
-        <link rel="stylesheet" href="@routes.Assets.versioned("lib/todomvc-common/base.css")">
+        <link rel="stylesheet" href="lib/todomvc-common/base.css">
         <link rel="stylesheet" href="assets/stylesheets/todomvc-app.css">
-        <script src='@routes.Assets.versioned("lib/angular2/bundles/angular2-polyfills.js")'></script>
-        <script src='@routes.Assets.versioned("lib/systemjs/dist/system.js")'></script>
-        <script src='@routes.Assets.versioned("lib/rxjs/bundles/Rx.js")'></script>
-        <script src='@routes.Assets.versioned("lib/angular2/bundles/angular2.dev.js")'></script>
-        <script>    @* our app is downloaded as individual javascript files by SystemJs
-                     after compilation by sbt-typescript*@
+        <script src='lib/angular2/bundles/angular2-polyfills.js'></script>
+        <script src='lib/systemjs/dist/system.js'></script>
+        <script src='lib/rxjs/bundles/Rx.js'></script>
+        <script src='lib/angular2/bundles/angular2.dev.js'></script>
+        <script>
+                // our app is downloaded as individual javascript files by SystemJs after compilation by sbt-typescript
                 System.config({
                     packages: {
                         'assets/app': {
@@ -24,12 +23,12 @@
                         }
                     },
                     map: {
-                        'app' : 'assets/app' @* play standardly publishes our asset files under /assets *@
+                        'app' : 'assets/app' // play standardly publishes our asset files under /assets 
                     }
 
 
                 });
-                @* SystemJs works out which other modules our bootstrap module depends on and will download and load them*@
+                // SystemJs works out which other modules our bootstrap module depends on and will download and load them
             System.import('app/bootstrap')
                     .catch(console.error.bind(console));
 		</script>
