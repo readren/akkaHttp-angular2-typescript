@@ -30,7 +30,6 @@ import akka.http.scaladsl.server.Directives.pathSingleSlash
 import akka.http.scaladsl.server.Directives.segmentStringToPathMatcher
 import akka.http.scaladsl.server.ExceptionHandler
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.ParserSettings
 import akka.http.scaladsl.settings.RoutingSettings
 import akka.stream.ActorMaterializer
@@ -44,32 +43,6 @@ object Main {
 
 class Application extends Actor with ActorLogging {
 
-  private var fServerBinding: Future[Http.ServerBinding] = _
-
-  override def preStart = {
-    implicit val actorSystem = this.context.system
-    implicit val materializer = ActorMaterializer()(actorSystem)
-
-    val config = ConfigFactory.load()
-    implicit val rs = RoutingSettings(config)
-    implicit val ps = ParserSettings(config)
-
-    val flow: Flow[HttpRequest, HttpResponse, NotUsed] = Route.handlerFlow(route)
-    fServerBinding = Http().bindAndHandle(flow, interface = "localhost", port = 9000)
-  }
-
-  override def postStop = {
-    fServerBinding.onSuccess { case sb => sb.unbind() }(context.dispatcher)
-  }
-
-  private val myExceptionHandler = ExceptionHandler {
-    case e =>
-      extractUri { uri =>
-        log.error(s"Request to $uri could not be handled normally.", e)
-        complete(HttpResponse(StatusCodes.InternalServerError, entity = "We are ashamed! Something went wrong :("))
-      }
-  }
-
   /**
    * change the vale of `index` here to use a different way of compilation and loading of the ts ng2 app.
    * index  :    does no ts compilation in advance. the ts files are download by the browser and compiled there to js.
@@ -77,8 +50,16 @@ class Application extends Actor with ActorLogging {
    * index2 :    add the option -DtsCompileMode=stage to your sbt task . F.i. 'sbt ~run -DtsCompileMode=stage' this will produce the app as one single js file.
    */
   private val index = "views/index1.scala.html"
-  private val route: Route =
-    handleExceptions(myExceptionHandler) {
+
+  private var fServerBinding: Future[Http.ServerBinding] = _
+
+  override def preStart = {
+    implicit val actorSystem = this.context.system
+    implicit val materializer = ActorMaterializer.create(actorSystem)
+    implicit val rs = RoutingSettings(actorSystem)
+    implicit val ps = ParserSettings(actorSystem)
+
+    val route: Route =
       encodeResponse {
         pathSingleSlash {
           getFromResource(index)
@@ -91,18 +72,17 @@ class Application extends Actor with ActorLogging {
           self ! "shutdown"
           complete(HttpEntity("shuting down.."))
         }
-    }
+    
+    val flow: Flow[HttpRequest, HttpResponse, NotUsed] = Route.handlerFlow(route)
+    fServerBinding = Http().bindAndHandle(flow, interface = "localhost", port = 9000)
+  }
 
-  def receive: Receive = {
-    case "shutdown" =>
-      import context.dispatcher
-      log.info("disconecting..")
-      fServerBinding.onSuccess {
-        case sb =>
-          log.info("shuting down...")
-          sb.unbind().onComplete { _ => context.stop(self) }
-      }
-      
+  override def postStop = {
+    fServerBinding.onSuccess { case sb => sb.unbind() }(context.dispatcher)
+  }
+
+  override def receive: Receive = {
+    case "shutdown" => context.stop(self)
   }
 }
 
