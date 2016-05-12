@@ -1,6 +1,6 @@
 name := """akkaHttp-angular2-typescript"""
 version := "0.1.0-SNAPSHOT"
-lazy val root = (project in file(".")).enablePlugins(SbtWeb)
+lazy val root = (project in file(".")).enablePlugins(SbtWeb).settings(projectAddOns.settings)
 
 scalaVersion := "2.11.8"
 incOptions := incOptions.value.withNameHashing(true)
@@ -56,6 +56,7 @@ sourcesInBase := false
 // adds, to the runtime classpath, the directories where the webjars are extracted (with META-INF and version stripped).
 (managedClasspath in Runtime) ++= WebKeys.nodeModuleDirectories.in(Assets).value
 (managedClasspath in Runtime) += WebKeys.webJarsDirectory.in(Assets).value  
+
 
 // run the application in a separate JVM (instead of using the same than SBT)
 fork in run := true

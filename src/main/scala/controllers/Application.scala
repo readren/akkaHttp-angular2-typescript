@@ -2,8 +2,6 @@ package controllers
 
 import scala.concurrent.Future
 
-import com.typesafe.config.ConfigFactory
-
 import akka.NotUsed
 import akka.actor.Actor
 import akka.actor.ActorLogging
@@ -11,24 +9,18 @@ import akka.actor.actorRef2Scala
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.ToResponseMarshallable.apply
 import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.model.HttpEntity.apply
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.model.HttpResponse
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directive.addByNameNullaryApply
-import akka.http.scaladsl.server.Directive.addDirectiveApply
 import akka.http.scaladsl.server.Directives.complete
 import akka.http.scaladsl.server.Directives.encodeResponse
 import akka.http.scaladsl.server.Directives.enhanceRouteWithConcatenation
-import akka.http.scaladsl.server.Directives.extractUri
 import akka.http.scaladsl.server.Directives.getFromResource
 import akka.http.scaladsl.server.Directives.getFromResourceDirectory
-import akka.http.scaladsl.server.Directives.handleExceptions
 import akka.http.scaladsl.server.Directives.path
 import akka.http.scaladsl.server.Directives.pathPrefix
 import akka.http.scaladsl.server.Directives.pathSingleSlash
 import akka.http.scaladsl.server.Directives.segmentStringToPathMatcher
-import akka.http.scaladsl.server.ExceptionHandler
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.ParserSettings
 import akka.http.scaladsl.settings.RoutingSettings
@@ -44,7 +36,7 @@ object Main {
 class Application extends Actor with ActorLogging {
 
   /**
-   * change the vale of `index` here to use a different way of compilation and loading of the ts ng2 app.
+   * change the value of `index` here to use a different way of compilation and loading of the ts ng2 app.
    * index  :    does no ts compilation in advance. the ts files are download by the browser and compiled there to js.
    * index1 :    compiles the ts files to individual js files. Systemjs loads the individual files.
    * index2 :    add the option -DtsCompileMode=stage to your sbt task . F.i. 'sbt ~run -DtsCompileMode=stage' this will produce the app as one single js file.
