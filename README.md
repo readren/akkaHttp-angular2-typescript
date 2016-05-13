@@ -22,13 +22,5 @@ This project shows 3 ways of loading that app in the browser using akka-http.
 For a lot of production applications option 3 will be required. While option 2 is nicer for development. 
 We can do both without changing our source code by using `sbt ~run` for the former and `sbt stage -DtsCompileMode=stage` for the latter. So to get option 3 to work you'll have to provide that `-DtsCompileMode=stage` jvm argument.
 
-
-##what to do if
-- "I've created the application through activator ui and the client browser you opened to connect to the application shows a message saying that the resource can't not be found":
-This is a [known problem](https://github.com/sbt/sbt-core-next/issues/9) with activator. To solve it, close the activator ui and try to run this application using the activator interactive shell. But before that, remove the file "&lt;project-base&gt;/project/sbt-ui.sbt" or comment its contents. Said file is added by activator during the template instantiation to activate the sbt-core-next plugin required by the activator ui. Unfortunately this plugin causes the classpath be incomplete at runtime, impeding the application to obtain the resources it needs.
-
-- "I've created the application through activator and it runs fine in activator but it hangs when I try to run it through sbt":
-This is a [known problem](https://github.com/typesafehub/activator/issues/1036) with activator. Activator generates a file `project\play-fork-run.sbt` that causes this. If you remove it or comment out its contents the application will run in sbt.
-
 ##Credits
 All credits are for [Joost de Vries](https://github.com/joost-de-vries) who did the [Play Angular2 Typescript](https://github.com/readren/akkaHttp-angular2-typescript) which is the base of this project. Everything is identical except the web server technology used: akka-http instead of play.
