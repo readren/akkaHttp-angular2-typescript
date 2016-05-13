@@ -18,7 +18,7 @@ object projectAddOns {
 
   private val unscopedSettings: Seq[Setting[_]] = Seq(
     mirrorNodeModules := createNodeModulesMirror(webJarsNodeModulesDirectory.value, sourceDirectory.value, streams.value.log),
-    webJarsNodeModules <<= webJarsNodeModules.dependsOn(mirrorNodeModules)) // the goal of this line is that the mirrorNodeModules task be automaticaly executed every time the webJarsNodeModules task is executed
+    nodeModules <<= nodeModules.dependsOn(mirrorNodeModules)) // the goal of this line is that the mirrorNodeModules task be automaticaly executed every time the nodeModules task is executed
 
   val settings = inConfig(Assets)(unscopedSettings) ++ inConfig(TestAssets)(unscopedSettings)
 
