@@ -14,7 +14,7 @@
   -->
   <logger name="controllers" level="DEBUG" />
 
-  <root level="ERROR">
+  <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
 

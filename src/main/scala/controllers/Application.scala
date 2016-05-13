@@ -12,20 +12,14 @@ import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.server.Directive.addByNameNullaryApply
-import akka.http.scaladsl.server.Directives.complete
-import akka.http.scaladsl.server.Directives.encodeResponse
-import akka.http.scaladsl.server.Directives.enhanceRouteWithConcatenation
-import akka.http.scaladsl.server.Directives.getFromResource
-import akka.http.scaladsl.server.Directives.getFromResourceDirectory
-import akka.http.scaladsl.server.Directives.path
-import akka.http.scaladsl.server.Directives.pathPrefix
-import akka.http.scaladsl.server.Directives.pathSingleSlash
-import akka.http.scaladsl.server.Directives.segmentStringToPathMatcher
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.ParserSettings
 import akka.http.scaladsl.settings.RoutingSettings
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Flow
+import akka.http.scaladsl.server.directives.LogEntry
+import akka.http.scaladsl.server.RouteResult
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -51,22 +45,32 @@ class Application extends Actor with ActorLogging {
     implicit val rs = RoutingSettings(actorSystem)
     implicit val ps = ParserSettings(actorSystem)
 
+    def toLogEntry(marker: String, f: Any => String) = (r: Any) => LogEntry(marker + f(r), akka.event.Logging.InfoLevel)
+
     val route: Route =
-      encodeResponse {
-        pathSingleSlash {
-          getFromResource(index)
-        } ~
-          pathPrefix("lib" | "assets") { // TODO: put libraries and assets in separate folders. 
-            getFromResourceDirectory("")
-          }
-      } ~
-        path("shutdown") { // TODO: add a button in the presentation to shut down. 
-          self ! "shutdown"
-          complete(HttpEntity("shuting down.."))
+      extractRequest { request =>
+        logResult(toLogEntry(s"${request.method.name} ${request.uri} ==> ", {
+          case c: RouteResult.Complete => c.response.status.toString()
+          case x             => s"unknown response part of type ${x.getClass}"
+        })) {
+          encodeResponse {
+            pathSingleSlash {
+              getFromResource(index)
+            } ~
+              pathPrefix("lib" | "assets") { // TODO: put libraries and assets in separate folders. 
+                getFromResourceDirectory("")
+              }
+          } ~
+            path("shutdown") { // TODO: add a button in the presentation to shut down. 
+              self ! "shutdown"
+              complete(HttpEntity("shuting down.."))
+            }
         }
-    
+      }
+
     val flow: Flow[HttpRequest, HttpResponse, NotUsed] = Route.handlerFlow(route)
     fServerBinding = Http().bindAndHandle(flow, interface = "localhost", port = 9000)
+    log.info("listening to http://localhost:9000")
   }
 
   override def postStop = {
