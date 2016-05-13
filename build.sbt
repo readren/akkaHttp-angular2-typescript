@@ -6,6 +6,7 @@ scalaVersion := "2.11.8"
 incOptions := incOptions.value.withNameHashing(true)
 updateOptions := updateOptions.value.withCachedResolution(cachedResoluton = true)
 
+// Note that all webjars dependencies are marked as "provided". This is to avoid them be added to the runtime class path. Just for efficiency. It's not needed.
 libraryDependencies ++= Seq(
   // binding logback as the underlying logging framework for SLF4J
   "ch.qos.logback" % "logback-classic" % "1.1.3",
@@ -18,21 +19,21 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-slf4j" % "2.4.4",
 
   //angular2 dependencies
-  "org.webjars.npm" % "angular2" % "2.0.0-beta.17",
-  "org.webjars.npm" % "systemjs" % "0.19.26",
-  "org.webjars.npm" % "todomvc-common" % "1.0.2",
-  "org.webjars.npm" % "rxjs" % "5.0.0-beta.7",
-  "org.webjars.npm" % "es6-promise" % "3.1.2",
-  "org.webjars.npm" % "es6-shim" % "0.35.0",
-  "org.webjars.npm" % "reflect-metadata" % "0.1.3",
-  "org.webjars.npm" % "zone.js" % "0.6.12",
-  "org.webjars.npm" % "typescript" % "1.8.10",
+  "org.webjars.npm" % "angular2" % "2.0.0-beta.17" % "provided",
+  "org.webjars.npm" % "systemjs" % "0.19.26" % "provided",
+  "org.webjars.npm" % "todomvc-common" % "1.0.2" % "provided",
+  "org.webjars.npm" % "rxjs" % "5.0.0-beta.7" % "provided",
+  "org.webjars.npm" % "es6-promise" % "3.1.2" % "provided",
+  "org.webjars.npm" % "es6-shim" % "0.35.0" % "provided",
+  "org.webjars.npm" % "reflect-metadata" % "0.1.3" % "provided",
+  "org.webjars.npm" % "zone.js" % "0.6.12" % "provided",
+  "org.webjars.npm" % "typescript" % "1.8.10" % "provided",
 
   //tslint dependency
-  "org.webjars.npm" % "tslint-eslint-rules" % "1.2.0",
-  "org.webjars.npm" % "codelyzer" % "0.0.19"
+  "org.webjars.npm" % "tslint-eslint-rules" % "1.2.0" % "provided",
+  "org.webjars.npm" % "codelyzer" % "0.0.19" % "provided"
 )
-dependencyOverrides += "org.webjars.npm" % "minimatch" % "3.0.0"
+dependencyOverrides += "org.webjars.npm" % "minimatch" % "3.0.0" % "provided"
 
 // the typescript typing information is by convention in the typings directory
 // It provides ES6 implementations. This is required when compiling to ES5.
