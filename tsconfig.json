@@ -15,7 +15,8 @@
     "noImplicitAny":true,
     "noFallthroughCasesInSwitch":true,
     "noImplicitReturns":true,
-    "outDir": "./target/web/typescript",
+    /* used only when compiling outside of SBT. The compilation performed in the `sbt-web` pipeline stage by sbt-typescript uses the folder pointed by `resourceManaged in typescript in Assets`, ignoring this entry.  */
+    "outDir": "./target/web/tscOutDir",
     "listFiles": true,
     "pretty": true
   },
