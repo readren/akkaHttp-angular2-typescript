@@ -35,7 +35,7 @@ class Application extends Actor with ActorLogging {
    * index1 :    compiles the ts files to individual js files. Systemjs loads the individual files.
    * index2 :    add the option -DtsCompileMode=stage to your sbt task . F.i. 'sbt ~run -DtsCompileMode=stage' this will produce the app as one single js file.
    */
-  private val index = "views/index1.scala.html"
+  private val index = "index.html"
   
   private val port = 9000
 

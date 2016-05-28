@@ -30,3 +30,4 @@ project/plugins/project/
 
 #Visual Studio Code specific
 .vscode/
+/libexec/

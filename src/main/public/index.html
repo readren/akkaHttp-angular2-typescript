@@ -1,35 +1,40 @@
-<!doctype html>
-<html lang="en" data-framework="angular2">
-	<head>
-		<meta charset="utf-8">
-		<title>Angular2 • TodoMVC</title>
-		<link rel="stylesheet" href="node_modules/todomvc-common/base.css">
-		<link rel="stylesheet" href="node_modules/todomvc-app-css/index.css">
-		<script src="node_modules/angular2/bundles/angular2-polyfills.js"></script>
-		<script src="node_modules/systemjs/dist/system.src.js"></script>
-		<script src="node_modules/rxjs/bundles/Rx.js"></script>
-		<script src="assets/libangular2/bundles/angular2.dev.js"></script>
-	</head>
-	<body>
-		<todo-app></todo-app>
-		<footer class="info">
-			<p>Double-click to edit a todo</p>
-			<p>
-				Created by <a href="http://github.com/samccone">Sam Saccone</a> and <a href="http://github.com/colineberhardt">Colin Eberhardt</a>
-				using <a href="http://angular.io">Angular2</a>
-			</p>
-			<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
-		</footer>
-		<script>
-			System.config({
-				packages: {
-					'app': {
-						format: 'cjs',
-						defaultExtension: 'js'
-					}
-				}
-			});
-			System.import('app/bootstrap');
-		</script>
-	</body>
+<html>
+
+<head>
+    <title>Angular 2 QuickStart</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="static/styles.css">
+    <!-- 1. Load libraries -->
+
+    <!-- Polyfill(s) for older browsers -->
+    <script src='lib/angular2/bundles/angular2-polyfills.js'></script>
+    <!-- script src="lib/client/shim.min.js"></script -->
+
+    <!--script src="lib/zone.js/dist/zone.js"></script-->
+    <!--script src="lib/reflect-metadata/Reflect.js"></script-->
+
+    <!-- script src="lib/systemjs/dist/system.src.js"></script -->
+    <script src='lib/systemjs/dist/system.js'></script>
+
+    <script src='lib/rxjs/bundles/Rx.js'></script>
+    <script src='lib/angular2/bundles/angular2.dev.js'></script>
+
+    <!-- 2. Configure SystemJS -->
+    <script src="static/systemjs.config.js"></script>
+    
+    
+    
+    
+    
+    <script>
+        System.import('app/main').catch(function(err){ console.error(err); });
+    </script>
+</head>
+<!-- 3. Display the application -->
+
+<body>
+    <my-app>Loading...</my-app>
+</body>
+
 </html>
