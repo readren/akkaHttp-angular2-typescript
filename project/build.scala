@@ -18,7 +18,7 @@ object projectAddOns {
 
   private val unscopedSettings: Seq[Setting[_]] = Seq(
     mirrorNodeModules := createNodeModulesMirror(webJarsNodeModulesDirectory.value, sourceDirectory.value, streams.value.log),
-    nodeModules <<= nodeModules.dependsOn(mirrorNodeModules)) // the goal of this line is that the mirrorNodeModules task be automaticaly executed every time the nodeModules task is executed
+    webJarsNodeModules <<= webJarsNodeModules.dependsOn(mirrorNodeModules)) // the goal of this line is that the mirrorNodeModules task be automaticaly executed every time the webJarsNodeModules task is executed
 
   val settings = inConfig(Assets)(unscopedSettings) ++ inConfig(TestAssets)(unscopedSettings)
 
@@ -34,7 +34,7 @@ object projectAddOns {
    * @param at a file indicating the virtual directory path
    */
   private def createVirtualDirectory(of: File, at: File, logger: Logger): Unit = {
-    if (!at.exists) {
+    if (!at.exists) { // TODO solve the false positive error message "Cannot create a file when that file already exists." which happens on windows because `File.exists` gives false when the cheked file is a directory junction whose target don't exist.
       try {
         Files.createSymbolicLink(at.toPath(), of.toPath)
       } catch {

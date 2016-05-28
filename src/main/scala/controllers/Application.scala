@@ -36,6 +36,8 @@ class Application extends Actor with ActorLogging {
    * index2 :    add the option -DtsCompileMode=stage to your sbt task . F.i. 'sbt ~run -DtsCompileMode=stage' this will produce the app as one single js file.
    */
   private val index = "views/index1.scala.html"
+  
+  private val port = 9000
 
   private var fServerBinding: Future[Http.ServerBinding] = _
 
@@ -57,7 +59,7 @@ class Application extends Actor with ActorLogging {
             pathSingleSlash {
               getFromResource(index)
             } ~
-              pathPrefix("lib" | "assets") { // TODO: put libraries and assets in separate folders. 
+              pathPrefix("lib" | "assets"  | "static") { // TODO: put libraries and assets in separate folders. 
                 getFromResourceDirectory("")
               }
           } ~
@@ -69,8 +71,8 @@ class Application extends Actor with ActorLogging {
       }
 
     val flow: Flow[HttpRequest, HttpResponse, NotUsed] = Route.handlerFlow(route)
-    fServerBinding = Http().bindAndHandle(flow, interface = "localhost", port = 9000)
-    log.info("listening to http://localhost:9000")
+    fServerBinding = Http().bindAndHandle(flow, interface = "localhost", port = port)
+    log.info(s"listening to http://localhost:$port")
   }
 
   override def postStop = {
