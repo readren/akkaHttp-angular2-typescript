@@ -59,7 +59,7 @@ class Application extends Actor with ActorLogging {
             pathSingleSlash {
               getFromResource(index)
             } ~
-              pathPrefix("lib" | "assets"  | "static") { // TODO: put libraries and assets in separate folders. 
+              pathPrefix("lib" | "assets") { // TODO: put libraries and assets in separate folders. 
                 getFromResourceDirectory("")
               }
           } ~
