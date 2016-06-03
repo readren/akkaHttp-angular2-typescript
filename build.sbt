@@ -1,4 +1,4 @@
-name := """angular2-quickstart"""
+name := """angular2-beta17-tour-of-heroes"""
 version := "0.1.0-SNAPSHOT"
 lazy val root = (project in file(".")).enablePlugins(SbtWeb).settings(projectAddOns.settings)
 
@@ -24,7 +24,7 @@ libraryDependencies ++= Seq(
   //angular2 framework and utilities capabilities
   "org.webjars.npm" % "angular2" % "2.0.0-beta.17" % "provided",
   "org.webjars.npm" % "systemjs" % "0.19.29" % "provided", // A dynamic module loader compatible with the ES2015 module specification. There are other viable choices including the well-regarded webpack. SystemJS happens to be the one we use in the documentation samples. It works.
-
+  
   // polyfills required by angular2
   "org.webjars.npm" % "rxjs" % "5.0.0-beta.8" % "provided",// a polyfill for the Observables specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of rxjs (within a compatible version range) without waiting for Angular updates.
   // "org.webjars.npm" % "es6-promise" % "3.1.2" % "provided",
@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
   "org.webjars.npm" % "reflect-metadata" % "0.1.3" % "provided", // a dependency shared between Angular and the TypeScript compiler. Developers should be able to update a TypeScript package without upgrading Angular, which is why this is a dependency of the application and not a dependency of Angular.
   "org.webjars.npm" % "zone.js" % "0.6.12" % "provided", // a polyfill for the Zone specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of zone.js to use (within a compatible version range) without waiting for Angular updates.
   "org.webjars.npm" % "bootstrap" % "3.3.6" % "provided",
-  
+
   // typescript dependencies
   "org.webjars.npm" % "typescript" % "1.8.10" % "provided",
 

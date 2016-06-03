@@ -21,13 +21,34 @@ import akka.stream.scaladsl.Flow
 import akka.http.scaladsl.server.directives.LogEntry
 import akka.http.scaladsl.server.RouteResult
 
+import domain.HeroSrv
+import domain.Hero
+
 object Main {
   def main(args: Array[String]): Unit = {
     akka.Main.main(Array(classOf[Application].getName))
   }
 }
 
-class Application extends Actor with ActorLogging {
+import spray.json._
+import domain.Hero
+import domain.HeroSrv
+import domain.HeroSrv
+import akka.http.scaladsl.server.ExceptionHandler
+import akka.http.scaladsl.model.StatusCode
+import akka.http.scaladsl.server.RequestContext
+import akka.http.scaladsl.server.Directive
+
+// Required to protect against JSON Hijacking for Older Browsers: Always return JSON with an Object on the outside
+case class ArrayWrapper[T](wrappedArray: T)
+
+// collect your json format instances into a support trait:
+trait JsonSupport extends akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport with DefaultJsonProtocol {
+  implicit val heroFormat = jsonFormat2(Hero)
+  implicit def arrayWrapper[T: JsonFormat] = jsonFormat1(ArrayWrapper.apply[T])
+}
+
+class Application extends Actor with ActorLogging with JsonSupport {
 
   /**
    * change the value of `index` here to use a different way of compilation and loading of the ts ng2 app.
@@ -36,8 +57,8 @@ class Application extends Actor with ActorLogging {
    * index2 :    add the option -DtsCompileMode=stage to your sbt task . F.i. 'sbt ~run -DtsCompileMode=stage' this will produce the app as one single js file.
    */
   private val index = "index.html"
-  
-  private val port = 9000
+
+  private val port = 9001
 
   private var fServerBinding: Future[Http.ServerBinding] = _
 
@@ -49,19 +70,53 @@ class Application extends Actor with ActorLogging {
 
     def toLogEntry(marker: String, f: Any => String) = (r: Any) => LogEntry(marker + f(r), akka.event.Logging.InfoLevel)
 
-    val route: Route =
+    val heroRoute: Route =
+      pathPrefix("app" / "heroes") {
+        handleExceptions(exceptionHandler) {
+          get {
+            complete(ArrayWrapper(HeroSrv.getAllHeroes))
+          } ~
+            put {
+              path(IntNumber) { id =>
+                entity(as[Hero]) { hero =>
+                  HeroSrv.update(id, hero)
+                  complete("updated")
+                }
+              }
+            } ~
+            post {
+              pathEnd {
+                entity(as[Hero]) { hero =>
+                  HeroSrv.add(hero)
+                  complete("added")
+                }
+              }
+            } ~
+            delete {
+              path(IntNumber) { id =>
+                HeroSrv.remove(id)
+                complete("deleted")
+              }
+            }
+        }
+      }
+
+    val libAndAssetsRoute: Route = pathSingleSlash {
+      getFromResource(index)
+    } ~
+      pathPrefix("lib" | "assets") { // TODO: put libraries and assets in separate folders. 
+        getFromResourceDirectory("")
+      }
+
+    val compoundRoute: Route =
       extractRequest { request =>
         logResult(toLogEntry(s"${request.method.name} ${request.uri} ==> ", {
           case c: RouteResult.Complete => c.response.status.toString()
-          case x             => s"unknown response part of type ${x.getClass}"
+          case x                       => s"unknown response part of type ${x.getClass}"
         })) {
           encodeResponse {
-            pathSingleSlash {
-              getFromResource(index)
-            } ~
-              pathPrefix("lib" | "assets") { // TODO: put libraries and assets in separate folders. 
-                getFromResourceDirectory("")
-              }
+            heroRoute ~
+              libAndAssetsRoute
           } ~
             path("shutdown") { // TODO: add a button in the presentation to shut down. 
               self ! "shutdown"
@@ -70,8 +125,8 @@ class Application extends Actor with ActorLogging {
         }
       }
 
-    val flow: Flow[HttpRequest, HttpResponse, NotUsed] = Route.handlerFlow(route)
-    fServerBinding = Http().bindAndHandle(flow, interface = "localhost", port = port)
+    val routeFlow: Flow[HttpRequest, HttpResponse, NotUsed] = Route.handlerFlow(compoundRoute)
+    fServerBinding = Http().bindAndHandle(routeFlow, interface = "localhost", port = port)
     log.info(s"listening to http://localhost:$port")
   }
 
@@ -82,5 +137,19 @@ class Application extends Actor with ActorLogging {
   override def receive: Receive = {
     case "shutdown" => context.stop(self)
   }
+
+  val exceptionHandler = ExceptionHandler {
+    case s: SpecifiesErrorCode =>
+      extractUri { uri =>
+        log.warning("Request to {} could not be handled normally", uri)
+        complete(HttpResponse(s.code))
+      }
+  }
+
 }
 
+trait SpecifiesErrorCode { //self:Exception =>
+  val code: StatusCode
+}
+
+class AppExceptionWithStatusCode(val code: StatusCode) extends Exception with SpecifiesErrorCode

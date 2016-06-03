@@ -30,13 +30,13 @@
       "check-space"
     ],
     "indent": [
-      true,
-      "spaces"
+      false,
+      "tabs"
     ],
     "no-duplicate-variable": true,
     "no-eval": true,
     "no-internal-module": true,
-    "no-trailing-whitespace": true,
+    "no-trailing-whitespace": false,
     "no-var-keyword": true,
     "one-line": [
       true,
@@ -44,12 +44,12 @@
       "check-whitespace"
     ],
     "quotemark": [
-      true,
+      false,
       "single"
     ],
     "semicolon": [
       true,
-      "never"
+      "always"
     ],
     "triple-equals": [
       true,

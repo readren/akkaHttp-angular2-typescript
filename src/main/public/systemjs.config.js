@@ -47,9 +47,17 @@ System.config({
 		},
 		'assets/lib': {
 			defaultExtension: 'js'
-		}
+		},
+    'angular2': {
+      defaultExtension: 'js'
+    },
+    'rxjs': {
+      defaultExtension: 'js'
+    }
 	},
 	map: {
-		'app': 'assets/app' // sbtweb standardly publishes our asset files under /assets 
+		'app': 'assets/app', // our server publishes our asset files under /assets
+    'angular2': 'lib/angular2',
+    'rxjs' : 'lib/rxjs' 
 	}
 });
