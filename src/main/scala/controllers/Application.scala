@@ -36,7 +36,7 @@ class Application extends Actor with ActorLogging {
    * index2 :    add the option -DtsCompileMode=stage to your sbt task . F.i. 'sbt ~run -DtsCompileMode=stage' this will produce the app as one single js file.
    */
   private val index = "views/index1.scala.html"
-  
+
   private val port = 9000
 
   private var fServerBinding: Future[Http.ServerBinding] = _
@@ -49,28 +49,44 @@ class Application extends Actor with ActorLogging {
 
     def toLogEntry(marker: String, f: Any => String) = (r: Any) => LogEntry(marker + f(r), akka.event.Logging.InfoLevel)
 
-    val route: Route =
+    val indexRoute: Route = pathSingleSlash {
+      getFromResource(index)
+    } ~
+      pathPrefix("index.html") { // this route branch was added in order to resolve issue #1  
+        getFromResource(index)
+      }
+
+    val libAndAssetsRoute: Route =
+      pathPrefix("lib" | "assets") { // TODO: put libraries and assets in separate folders. 
+        getFromResourceDirectory("")
+      }
+
+    val shutdownRoute: Route =
+      path("shutdown") { // TODO: add a button in the presentation to shut down. 
+        self ! "shutdown"
+        complete(HttpEntity("shuting down.."))
+      }
+
+    /**Produces a log entry for every RouteResult. The log entry includes the request URI */
+    def logAccess(innerRoute: Route): Route = {
       extractRequest { request =>
         logResult(toLogEntry(s"${request.method.name} ${request.uri} ==> ", {
           case c: RouteResult.Complete => c.response.status.toString()
-          case x             => s"unknown response part of type ${x.getClass}"
-        })) {
-          encodeResponse {
-            pathSingleSlash {
-              getFromResource(index)
-            } ~
-              pathPrefix("lib" | "assets") { // TODO: put libraries and assets in separate folders. 
-                getFromResourceDirectory("")
-              }
-          } ~
-            path("shutdown") { // TODO: add a button in the presentation to shut down. 
-              self ! "shutdown"
-              complete(HttpEntity("shuting down.."))
-            }
-        }
+          case x                       => s"unknown response part of type ${x.getClass}"
+        }))(innerRoute)
+      }
+    }
+
+    val compoundRoute: Route =
+      logAccess {
+        encodeResponse {
+          indexRoute ~
+            libAndAssetsRoute
+        } ~
+          shutdownRoute
       }
 
-    val flow: Flow[HttpRequest, HttpResponse, NotUsed] = Route.handlerFlow(route)
+    val flow: Flow[HttpRequest, HttpResponse, NotUsed] = Route.handlerFlow(compoundRoute)
     fServerBinding = Http().bindAndHandle(flow, interface = "localhost", port = port)
     log.info(s"listening to http://localhost:$port")
   }
