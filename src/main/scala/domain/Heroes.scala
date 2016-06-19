@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.StatusCodes
 
 import controllers.AppExceptionWithStatusCode
 import controllers.SpecifiesErrorCode
+import scala.concurrent.Future
 
 case class Hero(id: Int, name: String)
 
@@ -27,21 +28,25 @@ object HeroSrv {
 
   def getAllHeroes: List[Hero] = this.heroes.values.toList
 
-  def update(id: Int, hero: Hero): Unit = {
+  def update(id: Int, hero: Hero): Future[Hero] = {
     if (id != hero.id)
-      throw new AppExceptionWithStatusCode(StatusCodes.BadRequest)
+      Future.failed(new AppExceptionWithStatusCode(StatusCodes.BadRequest))
     else if (heroes.isDefinedAt(hero.id))
-      heroes += hero.id -> hero
+      Future.successful {
+        heroes += hero.id -> hero
+        hero
+      }
     else
-      throw new AppExceptionWithStatusCode(StatusCodes.Gone)
+      Future.failed(new AppExceptionWithStatusCode(StatusCodes.Gone))
   }
 
-  def add(hero: Hero): Hero = {
+  def add(hero: Hero): Future[Hero] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
     if (hero.id != 0)
-      throw new AppExceptionWithStatusCode(StatusCodes.BadRequest)
+      Future.failed(new AppExceptionWithStatusCode(StatusCodes.BadRequest))
     else if (heroes.exists(h => h._2.name == hero.name))
-      throw new AppExceptionWithStatusCode(StatusCodes.Conflict)
-    else {
+      Future.failed(new AppExceptionWithStatusCode(StatusCodes.Conflict))
+    else Future {
       sequencer += 1
       val newHero = Hero(sequencer, hero.name)
       heroes += sequencer -> newHero
@@ -49,8 +54,12 @@ object HeroSrv {
     }
   }
 
-  def remove(id: Int): Unit = {
-    heroes -= id
+  def remove(id: Int): Future[Int] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
+    Future {
+      heroes -= id
+      id
+    }
   }
 }
 

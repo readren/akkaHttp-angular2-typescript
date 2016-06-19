@@ -11,33 +11,31 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable.apply
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.StatusCode
 import akka.http.scaladsl.server.Directive.addByNameNullaryApply
+import akka.http.scaladsl.server.Directive.addDirectiveApply
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.ExceptionHandler
 import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.RouteResult
+import akka.http.scaladsl.server.directives.LogEntry
+import akka.http.scaladsl.server.directives.LoggingMagnet.forMessageFromFullShow
+import akka.http.scaladsl.server.directives.OnSuccessMagnet.apply
 import akka.http.scaladsl.settings.ParserSettings
 import akka.http.scaladsl.settings.RoutingSettings
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Flow
-import akka.http.scaladsl.server.directives.LogEntry
-import akka.http.scaladsl.server.RouteResult
-
-import domain.HeroSrv
 import domain.Hero
+import domain.HeroSrv
+import spray.json.DefaultJsonProtocol
+import spray.json.JsonFormat
+import akka.http.scaladsl.server.Directive
 
 object Main {
   def main(args: Array[String]): Unit = {
     akka.Main.main(Array(classOf[Application].getName))
   }
 }
-
-import spray.json._
-import domain.Hero
-import domain.HeroSrv
-import domain.HeroSrv
-import akka.http.scaladsl.server.ExceptionHandler
-import akka.http.scaladsl.model.StatusCode
-import akka.http.scaladsl.server.RequestContext
-import akka.http.scaladsl.server.Directive
 
 // Required to protect against JSON Hijacking for Older Browsers: Always return JSON with an Object on the outside
 case class ArrayWrapper[T](wrappedArray: T)
@@ -68,7 +66,9 @@ class Application extends Actor with ActorLogging with JsonSupport {
     implicit val rs = RoutingSettings(actorSystem)
     implicit val ps = ParserSettings(actorSystem)
 
-    def toLogEntry(marker: String, f: Any => String) = (r: Any) => LogEntry(marker + f(r), akka.event.Logging.InfoLevel)
+    val indexRoute: Route = pathSingleSlash {
+      getFromResource(index)
+    }
 
     val heroRoute: Route =
       pathPrefix("app" / "heroes") {
@@ -79,50 +79,60 @@ class Application extends Actor with ActorLogging with JsonSupport {
             put {
               path(IntNumber) { id =>
                 entity(as[Hero]) { hero =>
-                  HeroSrv.update(id, hero)
-                  complete("updated")
+                  onSuccess(HeroSrv.update(id, hero)) { _ =>
+                    complete("updated")
+                  }
                 }
               }
             } ~
             post {
               pathEnd {
                 entity(as[Hero]) { hero =>
-                  HeroSrv.add(hero)
-                  complete("added")
+                  onSuccess(HeroSrv.add(hero)) { _ =>
+                    complete("added")
+                  }
                 }
               }
             } ~
             delete {
               path(IntNumber) { id =>
-                HeroSrv.remove(id)
-                complete("deleted")
+                onSuccess(HeroSrv.remove(id)) { _ =>
+                  complete("deleted")
+                }
               }
             }
         }
       }
 
-    val libAndAssetsRoute: Route = pathSingleSlash {
-      getFromResource(index)
-    } ~
+    val libAndAssetsRoute: Route =
       pathPrefix("lib" | "assets") { // TODO: put libraries and assets in separate folders. 
         getFromResourceDirectory("")
       }
 
-    val compoundRoute: Route =
+    val shutdownRoute: Route = path("shutdown") { // TODO: add a button in the presentation to shut down. 
+      self ! "shutdown"
+      complete(HttpEntity("shuting down.."))
+    }
+
+    /**Produces a log entry for every RouteResult. The log entry includes the request URI */
+    def logAccess(innerRoute: Route): Route = {
+      def toLogEntry(marker: String, f: Any => String) = (r: Any) => LogEntry(marker + f(r), akka.event.Logging.InfoLevel)
       extractRequest { request =>
         logResult(toLogEntry(s"${request.method.name} ${request.uri} ==> ", {
           case c: RouteResult.Complete => c.response.status.toString()
           case x                       => s"unknown response part of type ${x.getClass}"
-        })) {
-          encodeResponse {
+        }))(innerRoute)
+      }
+    }
+
+    val compoundRoute: Route =
+      logAccess {
+        encodeResponse {
+          indexRoute ~
             heroRoute ~
-              libAndAssetsRoute
-          } ~
-            path("shutdown") { // TODO: add a button in the presentation to shut down. 
-              self ! "shutdown"
-              complete(HttpEntity("shuting down.."))
-            }
-        }
+            libAndAssetsRoute
+        } ~ shutdownRoute
+
       }
 
     val routeFlow: Flow[HttpRequest, HttpResponse, NotUsed] = Route.handlerFlow(compoundRoute)
