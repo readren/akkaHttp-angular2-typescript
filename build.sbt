@@ -6,27 +6,35 @@ scalaVersion := "2.11.8"
 incOptions := incOptions.value.withNameHashing(true)
 updateOptions := updateOptions.value.withCachedResolution(cachedResoluton = true)
 
-// Note that all webjars dependencies are marked as "provided". This is to avoid them be added to the runtime class path. Just for efficiency. It's not needed.
+lazy val akkaVersion = "2.4.6"
+/** Note that all webjars dependencies are marked as "provided". This is to avoid them be added to the runtime class path. Just for efficiency. It's not needed.
+  * If they weren't marked as provided, they would be added to the runtime class path with the "META-INF/resources/webjars" path prefix. But since the SBT-Web's "webJarsNodeModules" task adds copies of them with the mentioned prefix and module version striped, which is more convenient, we can discard the originals. */  
 libraryDependencies ++= Seq(
   // binding logback as the underlying logging framework for SLF4J
-  "ch.qos.logback" % "logback-classic" % "1.1.3",
+  "ch.qos.logback" % "logback-classic" % "1.1.7", 
 
-  //akka dependencies
-  "com.typesafe.akka" %% "akka-actor" % "2.4.4",
-  "com.typesafe.akka" %% "akka-stream" % "2.4.4",
-  "com.typesafe.akka" %% "akka-http-core" % "2.4.4",
-  "com.typesafe.akka" %% "akka-http-experimental" % "2.4.4",
-  "com.typesafe.akka" %% "akka-slf4j" % "2.4.4",
+  //akka
+  "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+  "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+  "com.typesafe.akka" %% "akka-http-core" % akkaVersion,
+  "com.typesafe.akka" %% "akka-http-experimental" % akkaVersion,
+  "com.typesafe.akka" %% "akka-slf4j" % "2.4.6",
+  "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaVersion,
 
-  //angular2 dependencies
+  //angular2 framework and utilities capabilities
   "org.webjars.npm" % "angular2" % "2.0.0-beta.17" % "provided",
-  "org.webjars.npm" % "systemjs" % "0.19.26" % "provided",
-  "org.webjars.npm" % "todomvc-common" % "1.0.2" % "provided",
-  "org.webjars.npm" % "rxjs" % "5.0.0-beta.7" % "provided",
+  "org.webjars.npm" % "systemjs" % "0.19.29" % "provided", // A dynamic module loader compatible with the ES2015 module specification. There are other viable choices including the well-regarded webpack. SystemJS happens to be the one we use in the documentation samples. It works.
+  
+  // polyfills required by angular2
+  "org.webjars.npm" % "rxjs" % "5.0.0-beta.8" % "provided",// a polyfill for the Observables specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of rxjs (within a compatible version range) without waiting for Angular updates.
   "org.webjars.npm" % "es6-promise" % "3.1.2" % "provided",
-  "org.webjars.npm" % "es6-shim" % "0.35.0" % "provided",
-  "org.webjars.npm" % "reflect-metadata" % "0.1.3" % "provided",
-  "org.webjars.npm" % "zone.js" % "0.6.12" % "provided",
+  "org.webjars.npm" % "es6-shim" % "0.35.1" % "provided", // monkey patches the global context (window) with essential features of ES2015 (ES6). Developers may substitute an alternative polyfill that provides the same core APIs. This dependency should go away once these APIs are implemented by all supported ever-green browsers.
+  "org.webjars.npm" % "reflect-metadata" % "0.1.3" % "provided", // a dependency shared between Angular and the TypeScript compiler. Developers should be able to update a TypeScript package without upgrading Angular, which is why this is a dependency of the application and not a dependency of Angular.
+  "org.webjars.npm" % "zone.js" % "0.6.12" % "provided", // a polyfill for the Zone specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of zone.js to use (within a compatible version range) without waiting for Angular updates.
+
+  "org.webjars.npm" % "todomvc-common" % "1.0.2" % "provided", // the client side app?
+
+  // typescript dependencies
   "org.webjars.npm" % "typescript" % "1.8.10" % "provided",
 
   //tslint dependency
