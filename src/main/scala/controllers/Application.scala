@@ -30,6 +30,7 @@ import domain.HeroSrv
 import spray.json.DefaultJsonProtocol
 import spray.json.JsonFormat
 import akka.http.scaladsl.server.Directive
+import akka.http.scaladsl.model.StatusCodes
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -66,7 +67,7 @@ class Application extends Actor with ActorLogging with JsonSupport {
     implicit val rs = RoutingSettings(actorSystem)
     implicit val ps = ParserSettings(actorSystem)
 
-    val indexRoute: Route = pathSingleSlash {
+    val indexRoute: Route = (pathSingleSlash | path("heroes" | "dashBoard")  | pathPrefix("detail" /))  { 
       getFromResource(index)
     }
 
@@ -100,19 +101,21 @@ class Application extends Actor with ActorLogging with JsonSupport {
                   complete("deleted")
                 }
               }
-            }
+            } ~
+            complete(StatusCodes.MethodNotAllowed)
         }
       }
 
     val libAndAssetsRoute: Route =
       pathPrefix("lib" | "assets") { // TODO: put libraries and assets in separate folders. 
-        getFromResourceDirectory("")
+        getFromResourceDirectory("") ~ complete(StatusCodes.NotFound)
       }
 
-    val shutdownRoute: Route = path("shutdown") { // TODO: add a button in the presentation to shut down. 
-      self ! "shutdown"
-      complete(HttpEntity("shuting down.."))
-    }
+    val shutdownRoute: Route =
+      path("shutdown") { // TODO: add a button in the presentation to shut down. 
+        self ! "shutdown"
+        complete(HttpEntity("shuting down.."))
+      }
 
     /**Produces a log entry for every RouteResult. The log entry includes the request URI */
     def logAccess(innerRoute: Route): Route = {
@@ -127,11 +130,12 @@ class Application extends Actor with ActorLogging with JsonSupport {
 
     val compoundRoute: Route =
       logAccess {
-        encodeResponse {
-          indexRoute ~
+        shutdownRoute ~
+          encodeResponse {
             heroRoute ~
-            libAndAssetsRoute
-        } ~ shutdownRoute
+              libAndAssetsRoute ~
+              indexRoute
+          }
 
       }
 
