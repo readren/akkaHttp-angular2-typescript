@@ -6,8 +6,8 @@
     "component-selector-name": [true, "kebab-case"],
     "directive-selector-type": [true, "attribute"],
     "component-selector-type": [true, "element"],
-    "directive-selector-prefix": [true, "todo"],
-    "component-selector-prefix": [true, "todo"],
+    "directive-selector-prefix": [true, "my"],
+    "component-selector-prefix": [true, "my"],
     "use-input-property-decorator": true,
     "use-output-property-decorator": true,
     "use-host-property-decorator": true,
@@ -30,13 +30,13 @@
       "check-space"
     ],
     "indent": [
-      true,
-      "spaces"
+      false,
+      "tabs"
     ],
     "no-duplicate-variable": true,
     "no-eval": true,
     "no-internal-module": true,
-    "no-trailing-whitespace": true,
+    "no-trailing-whitespace": false,
     "no-var-keyword": true,
     "one-line": [
       true,
@@ -44,12 +44,12 @@
       "check-whitespace"
     ],
     "quotemark": [
-      true,
-      "double"
+      false,
+      "single"
     ],
     "semicolon": [
       true,
-      "never"
+      "always"
     ],
     "triple-equals": [
       true,

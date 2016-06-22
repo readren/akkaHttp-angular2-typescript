@@ -1,4 +1,4 @@
-name := """akkaHttp-angular2-typescript"""
+name := """angular2-beta17-tour-of-heroes"""
 version := "0.1.0-SNAPSHOT"
 lazy val root = (project in file(".")).enablePlugins(SbtWeb).settings(projectAddOns.settings)
 
@@ -18,7 +18,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
   "com.typesafe.akka" %% "akka-http-core" % akkaVersion,
   "com.typesafe.akka" %% "akka-http-experimental" % akkaVersion,
-  "com.typesafe.akka" %% "akka-slf4j" % "2.4.6",
+  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "com.typesafe.akka" %% "akka-http-spray-json-experimental" % akkaVersion,
 
   //angular2 framework and utilities capabilities
@@ -27,12 +27,11 @@ libraryDependencies ++= Seq(
   
   // polyfills required by angular2
   "org.webjars.npm" % "rxjs" % "5.0.0-beta.8" % "provided",// a polyfill for the Observables specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of rxjs (within a compatible version range) without waiting for Angular updates.
-  "org.webjars.npm" % "es6-promise" % "3.1.2" % "provided",
+  // "org.webjars.npm" % "es6-promise" % "3.1.2" % "provided",
   "org.webjars.npm" % "es6-shim" % "0.35.1" % "provided", // monkey patches the global context (window) with essential features of ES2015 (ES6). Developers may substitute an alternative polyfill that provides the same core APIs. This dependency should go away once these APIs are implemented by all supported ever-green browsers.
   "org.webjars.npm" % "reflect-metadata" % "0.1.3" % "provided", // a dependency shared between Angular and the TypeScript compiler. Developers should be able to update a TypeScript package without upgrading Angular, which is why this is a dependency of the application and not a dependency of Angular.
   "org.webjars.npm" % "zone.js" % "0.6.12" % "provided", // a polyfill for the Zone specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of zone.js to use (within a compatible version range) without waiting for Angular updates.
-
-  "org.webjars.npm" % "todomvc-common" % "1.0.2" % "provided", // the client side app?
+  "org.webjars.npm" % "bootstrap" % "3.3.6" % "provided",
 
   // typescript dependencies
   "org.webjars.npm" % "typescript" % "1.8.10" % "provided",

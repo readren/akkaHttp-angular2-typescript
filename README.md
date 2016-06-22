@@ -13,8 +13,16 @@ A symptom of having an older global `typescript` installation is that you get a 
 If you want to explore the upcoming typescript 2.0 you can find that in branch `ts-20-preview`. Specifically the resolution of webjar modules is done by core ts module resolution. Which should be more robust.
 
 ##Getting started
-The NG2 application is the standard todomvc app. 
-This project shows 3 ways of loading that app in the browser using akka-http.  
+The client side of this application is a copy of the sample used in the "tour of heroes" tutorial from the [official angular 2 documentation](https://angular.io/docs/ts/latest/tutorial/).
+The server side is a simple web server implemented with akka-http. 
+
+To start the web server:
+1) Go to the project root folder with the cd command, type activator, and wait the project builder initialization. This may take several minutes the first time.
+2) Then type compile and wait the builder builds the project. This also may take several minutes the first time.
+3) Then type re-start to start the web server. If everything is fine, the last line in the console should say "listening to http://localhost:9001".
+4) Open a modern web browser and type "http://localhost:9001" in the url address edit box. If everything is ok, you should see the "tour of heroes" tutorial application running.
+
+This project shows 3 ways of loading the client app in the browser:  
 1. let the browser load the typescript files and have them compiled in the browser itself. This is easy to setup. But it makes greater computation demands on the client device. And it is really hard to find out about compilation errors. Which rather defies the added value of typed programming that typescript provides. This is implemented in [this html file](https://github.com/readren/akkaHttp-angular2-typescript/blob/master/src/main/public/views/index.scala.html).
 2. let the SBT compile the typescript files when they're changed. The browser will load all the resulting individual js files individually. That can quickly lead to slow initial loading as the number of ts files of your application increases. This is implemented in [this html file](https://github.com/readren/akkaHttp-angular2-typescript/blob/master/src/main/public/views/index1.scala.html)
 3. let the SBT compile the typescript files into one single javascript file. This will load much quicker. This is implemented in [this html file](https://github.com/readren/akkaHttp-angular2-typescript/blob/master/src/main/public/views/index2.scala.html)
