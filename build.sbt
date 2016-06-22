@@ -1,4 +1,4 @@
-name := """angular2-beta17-tour-of-heroes"""
+name := """akka-http-angular2-typescript"""
 version := "0.1.0-SNAPSHOT"
 lazy val root = (project in file(".")).enablePlugins(SbtWeb).settings(projectAddOns.settings)
 
